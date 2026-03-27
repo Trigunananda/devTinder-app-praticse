@@ -1,30 +1,65 @@
 const express = require("express");
 const app = express();
 
-// Big Picture Flow
-// Request → Middleware → Route → Response
-// Request → adminAuth → next() → route → response
-// 👉 “app.use() is used for middleware, while app.get()/post() defines actual routes.”
+const asyncHandler = require("./middlewares/asyncHandler");
+const errorHandler = require("./middlewares/errorHandler");
+const AppError = require("./utils/AppError");
+// “Express uses error-handling middleware with four parameters to centrally manage errors. Errors are passed using next(err).”
 
-// TO check API in postman
-// http://localhost:6666/admin/getAllData
-// http://localhost:6666/admin/deleteUser
-// http://localhost:6666/user
+// 🧠 Simple Flow
+// Request → Route → asyncHandler → Error occurs → next(err) → errorHandler → Response
 
-const {adminAuth,userAuth} = require("./middlewares/auth");
-app.use("/admin",adminAuth);
+// Two ways to handle errors:
+// ✅ 1. Local (try-catch)
+// Used inside route
+// Avoid too many try-catch
+// Handles error immediately
+// ✅ 2. Global (middleware)
+// Handles all errors centrally
+// Cleaner approach
+// Use global error handler
 
-app.get("/user",userAuth,(req,res)=>{
-    res.send("User Data Sent")
-});
-
-app.get("/admin/getAllData",(req,res)=>{
-    console.log("All data sent");
-    res.send("get all data");
+// try-catch
+app.get("/getUserData",(req,res)=>{
+    try {
+        throw new Error("error")
+        // 👉 res.send("User data sent") will never run
+        res.send("User Data Sent")
+    } catch (error) {
+       res.status(500).send("Some error occur contact to the support Team") 
+    }
 })
-app.get("/admin/deleteUser", (req, res) => {
-    res.send("Deleted a User");
+
+// 🔥 1. Problem with Async Code (VERY IMPORTANT)
+// ❌ Normal try-catch DOES NOT work for async
+// app.get("/test", async (req, res, next) => {
+//   try {
+//     throw new Error("Something went wrong");
+//   } catch (err) {
+//     next(err); // ✅ pass to global handler
+//   }
+// });
+
+
+// 2. Global Error Handler (Middleware)
+// app.get("/getUserDataGlobal",(req,res,next)=>{
+//     const error = new Error("Something Failed")
+//     next(error)
+// })
+
+// Sample route
+app.get("/user", asyncHandler(async (req, res) => {
+  // simulate error
+  throw new AppError("User not found", 404);
+}));
+
+// Normal route
+app.get("/", (req, res) => {
+  res.send("Home Page");
 });
+
+// 🔥 IMPORTANT: Error handler must be LAST
+app.use(errorHandler);
 
 
 app.listen(6666, () => {
