@@ -9,6 +9,8 @@ const AppError = require("./utils/AppError");
 // 🧠 Simple Flow
 // Request → Route → asyncHandler → Error occurs → next(err) → errorHandler → Response
 
+
+
 // Two ways to handle errors:
 // ✅ 1. Local (try-catch)
 // Used inside route
@@ -47,9 +49,21 @@ app.get("/getUserData",(req,res)=>{
 //     next(error)
 // })
 
+
+// Use AppError when YOU want to control the error
+// Use asyncHandler to catch errors
+// Use errorHandler to send response
 // Sample route
 app.get("/user", asyncHandler(async (req, res) => {
+  // Normally:
+  // 👉 Problem:
+// ❌ No status code (always 500)
+// ❌ Not structured
+  // throw new Error("User not found");
+  
   // simulate error
+//   ✔ More control
+// ✔ Better API response
   throw new AppError("User not found", 404);
 }));
 
