@@ -15,21 +15,5 @@ class AppError extends Error {
     this.statusCode = statusCode;
   }
 }
-
+  
 module.exports = AppError;
-
-
-// Different Uses of this
-// 1. Inside Object
-// const car = {
-//   brand: "BMW",
-//   show() {
-//     console.log(this.brand);
-//   }
-// };
-// 2. Inside Class
-// class Person {
-//   constructor(name) {
-//     this.name = name;
-//   }
-// }
