@@ -8,13 +8,20 @@ const asyncHandler = require("./middlewares/asyncHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const AppError = require("./utils/AppError");
 
+// 🔥 Middleware to read JSON
+app.use(express.json());
 app.post("/signup", asyncHandler(async (req, res) => {
+const {firstName,lastName,emailId,password}=req.body;
 
+// Basic Validation
+if(!firstName || !lastName || !emailId ){
+  throw new AppError("Required Fields Missing",400)
+}
   const user = new User({
-    firstName: "Balia",
-    lastName: "Swain",
-    emailId: "balia.com",
-    password: "balia123",
+    firstName,
+    lastName,
+    emailId,
+    password,
   });
 
   const savedUser = await user.save();
