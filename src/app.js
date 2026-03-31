@@ -26,9 +26,9 @@ if(!firstName || !lastName || !emailId ){
 
   const savedUser = await user.save();
 
-  if (!savedUser) {
-    throw new AppError("User not created", 400);
-  }
+  // if (!savedUser) {
+  //   throw new AppError("User not created", 400);
+  // }
 
   res.status(201).json({
     success: true,
@@ -36,6 +36,39 @@ if(!firstName || !lastName || !emailId ){
     data: savedUser
   });
 }));
+
+// findOne → one record,First match only
+// find → multiple records (array)
+// Get User by Email
+app.get("/user",asyncHandler(async(req,res)=>{
+  const {emailId} = req.query;
+  if(!emailId){
+    throw new AppError("Email is requires",400)
+  }
+  const user = await User.findOne({emailId});
+  if(!user){
+    throw new AppError("User Not Found",404)
+  }
+  res.json({
+    success:true,
+    data:user
+  });
+}));
+
+// Feed API (Get All Users)
+app.get("/feed",asyncHandler(async(req,res)=>{
+  const users = await User.find({});
+  if(users.length === 0){
+    throw new AppError("No Users FOund",404)
+  }
+  res.json({
+    success:true,
+    results:users.length,
+    data:users
+  })
+}))
+
+
 
 // 🔥 IMPORTANT: Error handler must be LAST
 app.use(errorHandler);
