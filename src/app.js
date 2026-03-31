@@ -68,6 +68,64 @@ app.get("/feed",asyncHandler(async(req,res)=>{
   })
 }))
 
+// findOneAndUpdate (PATCH API)
+// Update using any field (like email)
+app.patch("/user",asyncHandler(async(req,res)=>{
+  const {emailId,firstName}=req.body;
+  if(!emailId){
+    throw new AppError("Email is Required",400);
+  }
+
+  const user = await User.findOneAndUpdate(
+    {emailId},
+    {firstName},
+    { returnDocument: "after" }
+  );
+
+  if(!user){
+    throw new AppError("User NOt Found",404);
+  }
+
+  res.json({
+    success:true,
+    message: "User updated",
+    data: user
+  })
+}))
+
+// findByIdAndUpdate (PATCH API)
+// Update using _id (most common in real apps)
+app.patch("/user/:id", asyncHandler(async(req,res)=>{
+  console.log("req.params",req.params.id)
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { returnDocument: "after" }
+  );
+  if(!user){
+    throw new AppError("User Not Found",404)
+  }
+  res.json({
+    success:true,
+    message:"User Updated",
+    data:user
+  })
+}))
+
+// findByIdAndDelete (DELETE API)
+// Delete user using ID
+app.delete("/user/:id",asyncHandler(async(req,res)=>{
+  const user = await User.findByIdAndDelete(req.params.id);
+
+  if(!user){
+    throw new AppError("User Not Found",404)
+  }
+  res.json({
+    success:true,
+    message:"User Deleted"
+  })
+}))
+
 
 
 // 🔥 IMPORTANT: Error handler must be LAST
