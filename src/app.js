@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+// 🔥 Middleware to read JSON
+app.use(express.json());
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -8,8 +10,7 @@ const asyncHandler = require("./middlewares/asyncHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const AppError = require("./utils/AppError");
 
-// 🔥 Middleware to read JSON
-app.use(express.json());
+
 app.post("/signup", asyncHandler(async (req, res) => {
 const {firstName,lastName,emailId,password}=req.body;
 
@@ -126,7 +127,56 @@ app.delete("/user/:id",asyncHandler(async(req,res)=>{
   })
 }))
 
+// ✅ findByIdAndUpdate
+// ✔ Partial update
+// ✔ Only updates given fields
+// ✔ Keeps existing data
+app.put("/user/:id", asyncHandler(async(req,res)=>{
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+    // Returns updated data
+    returnDocument:"after",
+    //  With runValidators → throws error
+    runValidators: true
+    }
+  );
+  if(!user){
+    throw new AppError("User Not Found",404)
+  }
+  res.json({
+    success:true,
+    message:"user updated partially",
+    data:user
+  })
+}))
 
+
+// ✅ findOneAndReplace
+// ✔ Full replace
+// ✔ Removes old data
+// ✔ Replaces entire document
+// Replace entire Documents,full replace removes old data
+app.put("/user/:id",asyncHandler(async(req,res)=>{
+const updateUser = await User.findOneAndReplace(
+  // findOneAndReplace must be an object so that 
+  {_id:req.params.id},
+  req.body,
+  {
+    returnDocument:"after",
+    runValidators:true
+  }
+);
+if(!updateUser){
+  throw new AppError("User Not Found")
+}
+res.json({
+  success:true,
+  message:"User Replaced",
+  data:updateUser
+});
+}));
 
 // 🔥 IMPORTANT: Error handler must be LAST
 app.use(errorHandler);
